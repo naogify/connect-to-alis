@@ -29,3 +29,4 @@ function cta_alis_api_key( $args ) {
 	<?php
 }
 
+//If post published -> get the post id -> get title,content,thumbnail_url,overview?.
