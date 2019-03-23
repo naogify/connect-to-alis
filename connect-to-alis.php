@@ -14,7 +14,10 @@
 
 add_theme_support( 'post-thumbnails' );
 
-add_action( 'admin_init', 'add_general_custom_sections' );
+
+/**
+ * Add the Alis user-info forms to the Setting.
+ */
 function add_general_custom_sections() {
 
 	register_setting( 'general', 'cta_alis_username' );
@@ -23,7 +26,13 @@ function add_general_custom_sections() {
 	register_setting( 'general', 'cta_alis_password' );
 	add_settings_field( 'cta_alis_password', 'Alis Password', 'cta_alis_password', 'general' );
 }
+add_action( 'admin_init', 'add_general_custom_sections' );
 
+
+/**
+ * Create the Username Form.
+ * @param $args
+ */
 function cta_alis_username( $args ) {
 	$alis_username = get_option( 'cta_alis_username' );
 	?>
@@ -32,6 +41,10 @@ function cta_alis_username( $args ) {
 	<?php
 }
 
+/**
+ * Create the Password Form.
+ * @param $args
+ */
 function cta_alis_password( $args ) {
 	$alis_password = get_option( 'cta_alis_password' );
 	?>
@@ -40,8 +53,12 @@ function cta_alis_password( $args ) {
 	<?php
 }
 
-
-add_action( 'transition_post_status', 'cta_alis_post_published', 10, 3 );
+/**
+ * Access to Alis api, when post is published.
+ * @param $new_status
+ * @param $old_status
+ * @param $post
+ */
 function cta_alis_post_published( $new_status, $old_status, $post ) {
 
 	$post_thumbnail_id = get_post_thumbnail_id( $post );
@@ -93,11 +110,13 @@ function cta_alis_post_published( $new_status, $old_status, $post ) {
 //		update_option( 'alis-dev-value', $post_thumbnail_id );
 	}
 }
+add_action( 'transition_post_status', 'cta_alis_post_published', 10, 3 );
 
-add_action( 'admin_enqueue_scripts', 'cta_alis_load_api_scripts' );
+/**
+ * Load Alis api scripts.
+ * @param $hook
+ */
 function cta_alis_load_api_scripts( $hook ) {
-
-    var_dump(plugin_dir_url(__FILE__));
 
 	if ( 'edit.php' == $hook || 'post-new.php' == $hook ) {
 
@@ -106,4 +125,6 @@ function cta_alis_load_api_scripts( $hook ) {
 		}
 	}
 }
+add_action( 'admin_enqueue_scripts', 'cta_alis_load_api_scripts' );
+
 
