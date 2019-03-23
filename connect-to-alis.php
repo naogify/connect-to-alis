@@ -118,13 +118,20 @@ add_action( 'transition_post_status', 'cta_alis_post_published', 10, 3 );
  */
 function cta_alis_load_api_scripts( $hook ) {
 
-	if ( 'edit.php' == $hook || 'post-new.php' == $hook ) {
+	if ( 'post-new.php' == $hook || 'post.php' == $hook ) {
 
 		if ( current_user_can( 'administrator' ) ) {
 			wp_enqueue_script( 'alis_api_scripts', plugin_dir_url(__FILE__) . '/dist/my-app.js', array(), '1.0.0', true );
 		}
+
+		$alis_username = get_option( 'cta_alis_username' );
+		$alis_password = get_option( 'cta_alis_password' );
+
+		if ( isset( $alis_username ) && isset( $alis_password ) ) {
+			$data = array( 'username' => $alis_username, 'password' => $alis_password );
+			wp_localize_script( 'alis_api_scripts', 'alis_user_info', $data );
+		}
+
 	}
 }
 add_action( 'admin_enqueue_scripts', 'cta_alis_load_api_scripts' );
-
-
