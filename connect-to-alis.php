@@ -43,7 +43,8 @@ function cta_alis_username( $args ) {
 
 /**
  * Create the Password Form.
- * @param $args
+ *
+ * @param $argss
  */
 function cta_alis_password( $args ) {
 	$alis_password = get_option( 'cta_alis_password' );
@@ -51,6 +52,21 @@ function cta_alis_password( $args ) {
     <input type="password" name="cta_alis_password" id="cta_alis_password" size="30"
            value="<?php echo esc_attr( $alis_password ); ?>"/>
 	<?php
+}
+
+
+add_action( 'wp_ajax_getToken', 'getToken' );
+function getToken() {
+
+	global $wpdb; // this is how you get access to the database
+
+	$token = esc_html( $_POST['idToken'] );
+
+	if ( isset( $token ) ) {
+		update_option( 'cta_token', $token );
+	}
+
+	wp_die(); // this is required to terminate immediately and return a proper response
 }
 
 /**
@@ -66,7 +82,10 @@ function cta_alis_post_published( $new_status, $old_status, $post ) {
 	if ( $old_status == 'new'  &&  $new_status == 'publish' || $old_status == 'pending' && $new_status == 'publish' || $old_status == 'draft' && $new_status == 'publish'|| $old_status == 'future' && $new_status == 'publish' || $old_status == 'auto-draft' && $new_status == 'publish' ) {
 
 
-		$token    = '';
+		$token = get_option( 'cta_token' );
+		if ( isset( $token ) ) {
+			esc_html( $token );
+		}
 		$base_url = 'https://alis.to/api/me/articles/drafts';
 		$title    = esc_html( $post->post_title );
 
@@ -121,17 +140,26 @@ function cta_alis_load_api_scripts( $hook ) {
 	if ( 'post-new.php' == $hook || 'post.php' == $hook ) {
 
 		if ( current_user_can( 'administrator' ) ) {
-			wp_enqueue_script( 'alis_api_scripts', plugin_dir_url(__FILE__) . '/dist/my-app.js', array(), '1.0.0', true );
+
+			$username = get_option( 'cta_alis_username' );
+			$password = get_option( 'cta_alis_password' );
+
+			wp_register_script( 'alis_api_scripts', plugin_dir_url( __FILE__ ) . '/dist/my-app.js' );
+			wp_enqueue_script( 'alis_api_scripts' );
+
+
+			if ( isset( $username ) && isset( $password ) ) {
+
+				$data_array = array(
+					'username' => esc_html( $username ),
+					'password' => esc_html( $password )
+				);
+				wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
+
+			}
+
 		}
-
-		$alis_username = get_option( 'cta_alis_username' );
-		$alis_password = get_option( 'cta_alis_password' );
-
-		if ( isset( $alis_username ) && isset( $alis_password ) ) {
-			$data = array( 'username' => $alis_username, 'password' => $alis_password );
-			wp_localize_script( 'alis_api_scripts', 'alis_user_info', $data );
-		}
-
 	}
+
 }
 add_action( 'admin_enqueue_scripts', 'cta_alis_load_api_scripts' );
