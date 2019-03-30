@@ -58,6 +58,9 @@ function cta_alis_password( $args ) {
 add_action( 'wp_ajax_getToken', 'getToken' );
 function getToken() {
 
+
+	check_ajax_referer( 'my-special-string', 'security' );
+
 	global $wpdb; // this is how you get access to the database
 
 	$token = esc_html( $_POST['idToken'] );
@@ -92,7 +95,7 @@ function cta_alis_post_published( $new_status, $old_status, $post ) {
 		if ( has_post_thumbnail() ) {
 			$thumbnail = get_the_post_thumbnail_url( (int) $post->ID, 'full' );
 		} else {
-			$thumbnail = esc_url( content_url() ) . '/plugins/connect-to-alis/assets/thumbnail02.jpg';
+			$thumbnail = esc_url( content_url() ) . '/plugins/connect-to-alis/assets/thumbnail.jpg';
 		}
 
 		$data = [
@@ -126,6 +129,8 @@ function cta_alis_post_published( $new_status, $old_status, $post ) {
 
 		curl_close( $curl );
 
+//		echo '<script type="text/javascript" >alert(' . $result . ')</script>';
+
 //		update_option( 'alis-dev-value', $post_thumbnail_id );
 	}
 }
@@ -150,9 +155,13 @@ function cta_alis_load_api_scripts( $hook ) {
 
 			if ( isset( $username ) && isset( $password ) ) {
 
+
+				$ajax_nonce = wp_create_nonce( "my-special-string" );
+
 				$data_array = array(
 					'username' => esc_html( $username ),
-					'password' => esc_html( $password )
+					'password' => esc_html( $password ),
+					'nonce'    => $ajax_nonce
 				);
 				wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
 
