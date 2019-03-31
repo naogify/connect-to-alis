@@ -85,6 +85,8 @@ function cta_alis_post_published( $new_status, $old_status, $post ) {
 	if ( $old_status == 'new'  &&  $new_status == 'publish' || $old_status == 'pending' && $new_status == 'publish' || $old_status == 'draft' && $new_status == 'publish'|| $old_status == 'future' && $new_status == 'publish' || $old_status == 'auto-draft' && $new_status == 'publish' ) {
 
 
+		wp_add_inline_script( 'alis_api_scripts', 'alert("hello world");' );
+
 		$token = get_option( 'cta_token' );
 		if ( isset( $token ) ) {
 			esc_html( $token );

@@ -1,12 +1,32 @@
-jQuery(document).ready(function ($) {
+jQuery(window).load(function ($) {
+
+
+    function cta_alis_user_info() {
+
+        var alisUsername = window.prompt("To Publish this post in Alis, enter your Alis Username");
+        var alisPassword = window.prompt("Also enter Alis Password");
+
+        return cta_alis_user_info = {
+            'username'  : alisUsername,
+            'password': alisPassword
+        };
+
+    }
+
+    var publishBtn = document.getElementsByClassName('editor-post-publish-panel__toggle')[0];
+    publishBtn.addEventListener("click", cta_alis_user_info, false);
+
+    console.log(cta_alis_user_info().username);
+    console.log(cta_alis_user_info().password);
+
 
     var AWS = require("aws-sdk/dist/aws-sdk");
 var AmazonCognitoIdentity = require('amazon-cognito-identity-js');
 var CognitoUserPool = AmazonCognitoIdentity.CognitoUserPool;
 
 var authenticationData = {
-    Username: cta_alis_user_info.username,
-    Password: cta_alis_user_info.password,
+    Username: cta_alis_user_info().username,
+    Password: cta_alis_user_info().password,
 };
 var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
 var poolData = { UserPoolId : 'ap-northeast-1_HNT0fUj4J',
@@ -14,7 +34,7 @@ var poolData = { UserPoolId : 'ap-northeast-1_HNT0fUj4J',
 };
 var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
 var userData = {
-    Username: cta_alis_user_info.username,
+    Username: cta_alis_user_info().username,
     Pool : userPool
 };
 
@@ -32,12 +52,12 @@ cognitoUser.authenticateUser(authenticationDetails, {
             'idToken': idToken
         };
 
-        if (idToken) {
-            // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
-            jQuery.post(ajaxurl, data, function (response) {
-                // alert('Got this from the server: ' + response);
-            });
-        }
+        // if (idToken) {
+        //     // since 2.8 ajaxurl is always defined in the admin header and points to admin-ajax.php
+        //     jQuery.post(ajaxurl, data, function (response) {
+        //         // alert('Got this from the server: ' + response);
+        //     });
+        // }
     },
 
     onFailure: function(err) {
