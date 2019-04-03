@@ -1,51 +1,40 @@
-var AWS = require("aws-sdk/dist/aws-sdk");
-var AmazonCognitoIdentity = require('amazon-cognito-identity-js');
-var CognitoUserPool = AmazonCognitoIdentity.CognitoUserPool;
+function cta_alis_user_info() {
 
-var authenticationData = {
-    Username : 'username',
-    Password : 'password',
-};
-var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
-var poolData = {
-    UserPoolId : '...', // Your user pool id here
-    ClientId : '...' // Your client id here
-};
-var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
-var userData = {
-    Username : 'username',
-    Pool : userPool
-};
-var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
-cognitoUser.authenticateUser(authenticationDetails, {
-    onSuccess: function (result) {
-        var accessToken = result.getAccessToken().getJwtToken();
+    // var AWS = require("aws-sdk/dist/aws-sdk");
+    var AmazonCognitoIdentity = require('amazon-cognito-identity-js');
+    // var CognitoUserPool = AmazonCognitoIdentity.CognitoUserPool;
 
-        //POTENTIAL: Region needs to be set if not already set previously elsewhere.
-        AWS.config.region = '<region>';
+    var alisUsername = prompt("To Publish this post in Alis, enter your Alis Username");
+    var alisPassword = prompt("Also enter Alis Password");
 
-        AWS.config.credentials = new AWS.CognitoIdentityCredentials({
-            IdentityPoolId : '...', // your identity pool id here
-            Logins : {
-                // Change the key below according to the specific region your user pool is in.
-                'cognito-idp.<region>.amazonaws.com/<YOUR_USER_POOL_ID>' : result.getIdToken().getJwtToken()
-            }
-        });
+    var authenticationData = {
+        Username: alisUsername,
+        Password: alisPassword,
+    };
+    var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+    var poolData = {
+        UserPoolId: 'ap-northeast-1_HNT0fUj4J',
+        ClientId: '2gri5iuukve302i4ghclh6p5rg'
+    };
+    var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+    var userData = {
+        Username: alisUsername,
+        Pool: userPool
+    };
+    var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+    cognitoUser.authenticateUser(authenticationDetails, {
+        onSuccess: function (result) {
 
-        //refreshes credentials using AWS.CognitoIdentity.getCredentialsForIdentity()
-        AWS.config.credentials.refresh((error) => {
-            if (error) {
-                console.error(error);
-            } else {
-                // Instantiate aws sdk service objects now that the credentials have been updated.
-                // example: var s3 = new AWS.S3();
-                console.log('Successfully logged!');
-            }
-        });
-    },
+            var idToken = result.idToken.jwtToken;
+        },
 
-    onFailure: function(err) {
-        alert(err.message || JSON.stringify(err));
-    },
+        onFailure: function (err) {
+            alert(err);
+        },
 
-});
+    });
+
+}
+
+var publishBtn = document.getElementsByClassName('editor-post-publish-panel__toggle')[0];
+publishBtn.addEventListener("click", cta_alis_user_info, false);

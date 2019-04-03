@@ -5,7 +5,10 @@
   "author": "Naoki Ohashi",
   "private": true,
   "scripts": {
-    "build": "webpack"
+    "start": "npm install && npm run build",
+    "build": "webpack",
+    "test": "bash bin/install-wp-tests.sh wordpress_test root 'wordpress' localhost latest && phpunit --testdox",
+    "unit": "phpunit --testdox"
   },
   "devDependencies": {
     "grunt": "~0.4.5",

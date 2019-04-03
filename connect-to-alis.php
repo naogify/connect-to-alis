@@ -3,8 +3,8 @@
  * Plugin Name:     Connect To Alis
  * Plugin URI:      PLUGIN SITE HERE
  * Description:     PLUGIN DESCRIPTION HERE
- * Author:          YOUR NAME HERE
- * Author URI:      YOUR SITE HERE
+ * Author:          Naoki Ohashi
+ * Author URI:      https://naoki-is.me/
  * Text Domain:     connect-to-alis
  * Domain Path:     /languages
  * Version:         0.1.0
@@ -14,33 +14,83 @@
 
 add_theme_support( 'post-thumbnails' );
 
-add_action( 'admin_init', 'add_general_custom_sections' );
+
+/**
+ * Add the Alis user-info forms to the Setting.
+ */
 function add_general_custom_sections() {
-	// register_setting( 'general', 'キー' )で値を保存
-	register_setting( 'general', 'cta_alis_api_key' );
-	// add_settings_field( 'キー', 'ラベル', 'コールバック関数', 'general' )で項目を追加
-	add_settings_field( 'cta_alis_api_key', 'Alis API key', 'cta_alis_api_key', 'general' );
 
-	var_dump( get_option( 'alis-dev-value' ) );
+	register_setting( 'general', 'cta_alis_username' );
+	add_settings_field( 'cta_alis_username', 'Alis Username', 'cta_alis_username', 'general' );
+
+	register_setting( 'general', 'cta_alis_password' );
+	add_settings_field( 'cta_alis_password', 'Alis Password', 'cta_alis_password', 'general' );
 }
+add_action( 'admin_init', 'add_general_custom_sections' );
 
-function cta_alis_api_key( $args ) {
-	$alis_api_key = get_option( 'cta_alis_api_key' );
+
+/**
+ * Create the Username Form.
+ * @param $args
+ */
+function cta_alis_username( $args ) {
+	$alis_username = get_option( 'cta_alis_username' );
 	?>
-    <input type="text" name="cta_alis_api_key" id="cta_alis_api_key" size="30"
-           value="<?php echo esc_attr( $alis_api_key ); ?>"/>
+    <input type="password" name="cta_alis_username" id="cta_alis_username" size="30"
+           value="<?php echo esc_attr( $alis_username ); ?>"/>
 	<?php
 }
 
-//If post published -> get the post id -> get title,content,thumbnail_url,overview?.
-add_action( 'transition_post_status', 'cta_alis_post_published', 10, 3 );
+/**
+ * Create the Password Form.
+ *
+ * @param $argss
+ */
+function cta_alis_password( $args ) {
+	$alis_password = get_option( 'cta_alis_password' );
+	?>
+    <input type="password" name="cta_alis_password" id="cta_alis_password" size="30"
+           value="<?php echo esc_attr( $alis_password ); ?>"/>
+	<?php
+}
+
+
+add_action( 'wp_ajax_getToken', 'getToken' );
+function getToken() {
+
+
+	check_ajax_referer( 'my-special-string', 'security' );
+
+	global $wpdb; // this is how you get access to the database
+
+	$token = esc_html( $_POST['idToken'] );
+
+	if ( isset( $token ) ) {
+		update_option( 'cta_token', $token );
+	}
+
+	wp_die(); // this is required to terminate immediately and return a proper response
+}
+
+/**
+ * Access to Alis api, when post is published.
+ * @param $new_status
+ * @param $old_status
+ * @param $post
+ */
 function cta_alis_post_published( $new_status, $old_status, $post ) {
 
 	$post_thumbnail_id = get_post_thumbnail_id( $post );
 
 	if ( $old_status == 'new'  &&  $new_status == 'publish' || $old_status == 'pending' && $new_status == 'publish' || $old_status == 'draft' && $new_status == 'publish'|| $old_status == 'future' && $new_status == 'publish' || $old_status == 'auto-draft' && $new_status == 'publish' ) {
 
-		$token    = 'eyJraWQiOiJEdHdzaHg2ZVkxNkpkdlc4MnpMU3o0ajNXOVpVRHhpY3Vvb0pST1NWanRBPSIsImFsZyI6IlJTMjU2In0.eyJzdWIiOiI1M2MwYjExYS0zNzIwLTRiMDItODJmNS1mNGEwMzczM2NhYTMiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiaXNzIjoiaHR0cHM6XC9cL2NvZ25pdG8taWRwLmFwLW5vcnRoZWFzdC0xLmFtYXpvbmF3cy5jb21cL2FwLW5vcnRoZWFzdC0xX0hOVDBmVWo0SiIsInBob25lX251bWJlcl92ZXJpZmllZCI6dHJ1ZSwiY29nbml0bzp1c2VybmFtZSI6Im5hb2dpZnkiLCJhdWQiOiIyZ3JpNWl1dWt2ZTMwMmk0Z2hjbGg2cDVyZyIsImV2ZW50X2lkIjoiZDQzYmJlNDMtNDczMy0xMWU5LWI0ZGQtZmY4ZjY1NTdlMDJkIiwidG9rZW5fdXNlIjoiaWQiLCJhdXRoX3RpbWUiOjE1NTI2NjIzNTQsInBob25lX251bWJlciI6Iis4MTgwOTQ3MjI3OTYiLCJjdXN0b206cHJpdmF0ZV9ldGhfYWRkcmVzcyI6IjB4MDM5YmQ0ZjhjNmNlNzAwMTU0ZGE3NzFjNzliYTgyYzM4Mzg3ZTEzYSIsImV4cCI6MTU1MjY3OTUyNiwiaWF0IjoxNTUyNjc1OTI2LCJlbWFpbCI6Im4uZ2xvYmUudXMrdHdpaXRlckBnbWFpbC5jb20ifQ.cAZHLjUSnujnhJfWaMvN5CK7NdvUfCZesD1Og93gvJ87_4OT-bEjc73Y80J_JgTz5bQ5z8ZPVPJ-pIyOSgeqn1CZESjq5zfyn4CW5JnOMPRz6mQ4guaT7_ShSs85LQBeh6CxdONAjZ5lTMyHw5wsRlBEnoDqQdEmeprjUHeYe6KVR743DCZWnerxgVmypqD2P_OG3ViCK-BpGuTY-zXoDW6Ot2eDkIfQ4ijp-m0izoVkUD-W7COepn6Jak8sOsMGV8Pm7rP0_WhnF-BqUqCbUpXw505hTJPBparvjskBlbs7aGxm0joNqKamgrTD4IO6GvdbgyoCSEVWkBjQNchMKw';
+
+		wp_add_inline_script( 'alis_api_scripts', 'alert("hello world");' );
+
+		$token = get_option( 'cta_token' );
+		if ( isset( $token ) ) {
+			esc_html( $token );
+		}
 		$base_url = 'https://alis.to/api/me/articles/drafts';
 		$title    = esc_html( $post->post_title );
 
@@ -66,21 +116,58 @@ function cta_alis_post_published( $new_status, $old_status, $post ) {
 		$curl = curl_init();
 
 		curl_setopt( $curl, CURLOPT_URL, $base_url );
-		curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'POST' ); // post
-		curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $data ) ); // jsonデータを送信
-		curl_setopt( $curl, CURLOPT_HTTPHEADER, $header ); // リクエストにヘッダーを含める
+		curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'POST' );
+		curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $data ) );
+		curl_setopt( $curl, CURLOPT_HTTPHEADER, $header );
 		curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $curl, CURLOPT_HEADER, true );
 
-		$response    = curl_exec( $curl );
-		$header_size = curl_getinfo( $curl, CURLINFO_HEADER_SIZE );
-		$header      = substr( $response, 0, $header_size );
-		$body        = substr( $response, $header_size );
-		$result      = json_decode( $body, true );
+//		$response    = curl_exec( $curl );
+//		$header_size = curl_getinfo( $curl, CURLINFO_HEADER_SIZE );
+//		$header      = substr( $response, 0, $header_size );
+//		$body        = substr( $response, $header_size );
+//		$result      = json_decode( $body, true );
 
 		curl_close( $curl );
 
-		update_option( 'alis-dev-value', $post_thumbnail_id );
 	}
 }
+add_action( 'transition_post_status', 'cta_alis_post_published', 10, 3 );
+
+/**
+ * Load Alis api scripts.
+ * @param $hook
+ */
+function cta_alis_load_api_scripts( $hook ) {
+
+	if ( 'post-new.php' == $hook || 'post.php' == $hook ) {
+
+		if ( current_user_can( 'administrator' ) ) {
+
+			$username = get_option( 'cta_alis_username' );
+			$password = get_option( 'cta_alis_password' );
+
+			wp_register_script( 'alis_api_scripts', plugin_dir_url( __FILE__ ) . '/dist/my-app.js' );
+			wp_enqueue_script( 'alis_api_scripts' );
+
+
+			if ( isset( $username ) && isset( $password ) ) {
+
+
+				$ajax_nonce = wp_create_nonce( "my-special-string" );
+
+				$data_array = array(
+					'username' => esc_html( $username ),
+					'password' => esc_html( $password ),
+					'nonce'    => $ajax_nonce
+				);
+				wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
+
+			}
+
+		}
+	}
+
+}
+add_action( 'admin_enqueue_scripts', 'cta_alis_load_api_scripts' );
