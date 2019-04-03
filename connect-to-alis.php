@@ -123,17 +123,14 @@ function cta_alis_post_published( $new_status, $old_status, $post ) {
 		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 		curl_setopt( $curl, CURLOPT_HEADER, true );
 
-		$response    = curl_exec( $curl );
-		$header_size = curl_getinfo( $curl, CURLINFO_HEADER_SIZE );
-		$header      = substr( $response, 0, $header_size );
-		$body        = substr( $response, $header_size );
-		$result      = json_decode( $body, true );
+//		$response    = curl_exec( $curl );
+//		$header_size = curl_getinfo( $curl, CURLINFO_HEADER_SIZE );
+//		$header      = substr( $response, 0, $header_size );
+//		$body        = substr( $response, $header_size );
+//		$result      = json_decode( $body, true );
 
 		curl_close( $curl );
 
-//		echo '<script type="text/javascript" >alert(' . $result . ')</script>';
-
-//		update_option( 'alis-dev-value', $post_thumbnail_id );
 	}
 }
 add_action( 'transition_post_status', 'cta_alis_post_published', 10, 3 );
