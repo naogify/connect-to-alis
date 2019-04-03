@@ -14,47 +14,6 @@
 
 add_theme_support( 'post-thumbnails' );
 
-
-/**
- * Add the Alis user-info forms to the Setting.
- */
-function add_general_custom_sections() {
-
-	register_setting( 'general', 'cta_alis_username' );
-	add_settings_field( 'cta_alis_username', 'Alis Username', 'cta_alis_username', 'general' );
-
-	register_setting( 'general', 'cta_alis_password' );
-	add_settings_field( 'cta_alis_password', 'Alis Password', 'cta_alis_password', 'general' );
-}
-add_action( 'admin_init', 'add_general_custom_sections' );
-
-
-/**
- * Create the Username Form.
- * @param $args
- */
-function cta_alis_username( $args ) {
-	$alis_username = get_option( 'cta_alis_username' );
-	?>
-    <input type="password" name="cta_alis_username" id="cta_alis_username" size="30"
-           value="<?php echo esc_attr( $alis_username ); ?>"/>
-	<?php
-}
-
-/**
- * Create the Password Form.
- *
- * @param $argss
- */
-function cta_alis_password( $args ) {
-	$alis_password = get_option( 'cta_alis_password' );
-	?>
-    <input type="password" name="cta_alis_password" id="cta_alis_password" size="30"
-           value="<?php echo esc_attr( $alis_password ); ?>"/>
-	<?php
-}
-
-
 add_action( 'wp_ajax_getToken', 'getToken' );
 function getToken() {
 
@@ -145,26 +104,16 @@ function cta_alis_load_api_scripts( $hook ) {
 
 		if ( current_user_can( 'administrator' ) ) {
 
-			$username = get_option( 'cta_alis_username' );
-			$password = get_option( 'cta_alis_password' );
-
 			wp_register_script( 'alis_api_scripts', plugin_dir_url( __FILE__ ) . '/dist/my-app.js' );
 			wp_enqueue_script( 'alis_api_scripts' );
-
-
-			if ( isset( $username ) && isset( $password ) ) {
-
 
 				$ajax_nonce = wp_create_nonce( "my-special-string" );
 
 				$data_array = array(
-					'username' => esc_html( $username ),
-					'password' => esc_html( $password ),
 					'nonce'    => $ajax_nonce
 				);
 				wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
 
-			}
 
 		}
 	}

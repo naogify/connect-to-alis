@@ -1,11 +1,19 @@
+window.addEventListener('DOMContentLoaded', function() {
+
+    var publishBtn = document.getElementsByClassName('editor-post-publish-panel__toggle')[0];
+    publishBtn.addEventListener("click", cta_alis_user_info, false);
+
+});
+
 function cta_alis_user_info() {
 
-    // var AWS = require("aws-sdk/dist/aws-sdk");
+    var AWS = require("aws-sdk/dist/aws-sdk");
     var AmazonCognitoIdentity = require('amazon-cognito-identity-js');
-    // var CognitoUserPool = AmazonCognitoIdentity.CognitoUserPool;
+    var CognitoUserPool = AmazonCognitoIdentity.CognitoUserPool;
 
     var alisUsername = prompt("To Publish this post in Alis, enter your Alis Username");
     var alisPassword = prompt("Also enter Alis Password");
+    var alisConfirm = alert("This post will also share in Alis. Are you OK about that?");
 
     var authenticationData = {
         Username: alisUsername,
@@ -26,6 +34,7 @@ function cta_alis_user_info() {
         onSuccess: function (result) {
 
             var idToken = result.idToken.jwtToken;
+            console.log(idToken);
         },
 
         onFailure: function (err) {
@@ -35,6 +44,3 @@ function cta_alis_user_info() {
     });
 
 }
-
-var publishBtn = document.getElementsByClassName('editor-post-publish-panel__toggle')[0];
-publishBtn.addEventListener("click", cta_alis_user_info, false);
