@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name:     Connect To Alis
- * Plugin URI:      PLUGIN SITE HERE
- * Description:     PLUGIN DESCRIPTION HERE
+ * Plugin URI:      https://github.com/naogify/connect-to-alis
+ * Description:     This is the WordPress plugin to share your post in Alis.
  * Author:          Naoki Ohashi
  * Author URI:      https://naoki-is.me/
  * Text Domain:     connect-to-alis
