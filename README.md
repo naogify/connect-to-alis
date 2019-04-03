@@ -1,4 +1,4 @@
-#Connect To Alis
+# Connect To Alis
 
 
 This is the WordPress plugin to share your post in [Alis](https://alis.to/) .
