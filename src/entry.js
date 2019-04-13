@@ -1,46 +1,53 @@
-window.addEventListener('DOMContentLoaded', function() {
+const {__} = wp.i18n;
 
-    var publishBtn = document.getElementsByClassName('editor-post-publish-panel__toggle')[0];
-    publishBtn.addEventListener("click", cta_alis_user_info, false);
+window.addEventListener('DOMContentLoaded', () => {
+
+    let publishBtn = document.getElementsByClassName('editor-post-publish-panel__toggle')[0];
+    publishBtn.addEventListener("click", cta_call_api_to_share_post, false);
+    publishBtn.addEventListener("click", cta_display_prompt, false);
 
 });
 
-function cta_alis_user_info() {
+const cta_display_prompt = () => {
 
-    var AWS = require("aws-sdk/dist/aws-sdk");
-    var AmazonCognitoIdentity = require('amazon-cognito-identity-js');
-    var CognitoUserPool = AmazonCognitoIdentity.CognitoUserPool;
+    let alisUsername = prompt(__('To Publish this post in Alis, enter your Alis Username', 'connect-to-alis'));
+    let alisPassword = prompt(__('Also enter Alis Password', 'connect-to-alis'));
 
-    var alisUsername = prompt("To Publish this post in Alis, enter your Alis Username");
-    var alisPassword = prompt("Also enter Alis Password");
-    var alisConfirm = alert("This post will also share in Alis. Are you OK about that?");
+    if (alisUsername && alisPassword) {
+        alert(__('This post will also share in Alis. Are you OK about that?', 'connect-to-alis'));
+        cta_get_token(alisUsername, alisPassword);
+    }
+};
 
-    var authenticationData = {
+const cta_get_token = (alisUsername, alisPassword) => {
+
+    let AmazonCognitoIdentity = require('amazon-cognito-identity-js');
+
+    let authenticationData = {
         Username: alisUsername,
         Password: alisPassword,
     };
-    var authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
-    var poolData = {
+    let authenticationDetails = new AmazonCognitoIdentity.AuthenticationDetails(authenticationData);
+    let poolData = {
         UserPoolId: 'ap-northeast-1_HNT0fUj4J',
         ClientId: '2gri5iuukve302i4ghclh6p5rg'
     };
-    var userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
-    var userData = {
+    let userPool = new AmazonCognitoIdentity.CognitoUserPool(poolData);
+    let userData = {
         Username: alisUsername,
         Pool: userPool
     };
-    var cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
+    let cognitoUser = new AmazonCognitoIdentity.CognitoUser(userData);
     cognitoUser.authenticateUser(authenticationDetails, {
-        onSuccess: function (result) {
+        onSuccess: (result) => {
 
-            var idToken = result.idToken.jwtToken;
-            console.log(idToken);
+            let idToken = result.idToken.jwtToken;
+
         },
 
-        onFailure: function (err) {
-            alert(err);
+        onFailure: (err) => {
+            alert("Fail to share your post in Alis. Something is wrong." + err);
         },
 
     });
-
-}
+};
