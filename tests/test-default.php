@@ -21,21 +21,6 @@ class SampleTest extends WP_UnitTestCase {
 		return $user_id;
 	}
 
-
-	/**
-	 * Load Alis api scripts test.
-	 */
-	public function test_load_api_js() {
-
-		$user_id = self::test_Sample_create_user( 'administrator' );
-
-		wp_set_current_user($user_id);
-
-		do_action( 'admin_enqueue_scripts' );
-
-		$this->assertTrue( wp_script_is( 'alis_api_scripts' ) );
-	}
-
 	/**
 	 * A single example test.
 	 */
