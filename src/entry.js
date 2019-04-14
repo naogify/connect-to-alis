@@ -50,7 +50,8 @@ window.addEventListener('DOMContentLoaded', () => {
                 },
 
                 onFailure: (err) => {
-                    alert("Fail to share your post in Alis. Something is wrong." + err);
+                    alert("Fail to share your post in Alis. Your userid or password is wrong.");
+                    console.log(err);
                 },
 
             });
@@ -64,7 +65,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 token: token
             };
 
-            jQuery.post(this.ajaxurl, data, function (response) {
+            jQuery.post(this.ajaxurl, data, (response) => {
                 console.log("Response: " + response);
             });
 

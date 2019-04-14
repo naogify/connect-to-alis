@@ -18,8 +18,9 @@ class CTA_Alis {
 	public function __construct() {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_api_scripts' ), 10, 1 );
-		add_action( 'transition_post_status', array( $this, 'call_publish_api' ), 10, 3 );
 		add_action( 'wp_ajax_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
+		add_action( 'transition_post_status', array( $this, 'call_publish_api' ), 10, 3 );
+
 	}
 
 	/**
@@ -71,12 +72,13 @@ class CTA_Alis {
 			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
 			curl_setopt( $curl, CURLOPT_HEADER, true );
 
-//		$response    = curl_exec( $curl );
-//		$header_size = curl_getinfo( $curl, CURLINFO_HEADER_SIZE );
-//		$header      = substr( $response, 0, $header_size );
-//		$body        = substr( $response, $header_size );
-//		$result      = json_decode( $body, true );
+			$response    = curl_exec( $curl );
+			$header_size = curl_getinfo( $curl, CURLINFO_HEADER_SIZE );
+			$header      = substr( $response, 0, $header_size );
+			$body        = substr( $response, $header_size );
+			$result      = json_decode( $body, true );
 
+			update_option('cta_alis_result',$result);
 			curl_close( $curl );
 
 		}
