@@ -61,7 +61,7 @@ window.addEventListener('DOMContentLoaded', () => {
             let data = {
                 action: 'get_ajax_data',
                 security: this.nonce,
-                my_string: token
+                token: token
             };
 
             jQuery.post(this.ajaxurl, data, function (response) {

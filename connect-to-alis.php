@@ -116,7 +116,7 @@ class CTA_Alis {
 	 */
 	public function get_ajax_data() {
 		check_ajax_referer( 'my-special-string', 'security' );
-		echo sanitize_text_field( $_POST['my_string'] );
-		wp_die();
+		$token = sanitize_text_field( $_POST['token'] );
+		update_option('cta_alis_id_token',$token);
 	}
 }
