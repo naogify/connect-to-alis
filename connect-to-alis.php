@@ -19,28 +19,74 @@ class CTA_Alis {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_api_scripts' ), 10, 1 );
 		add_action( 'wp_ajax_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
-		add_action( 'transition_post_status', array( $this, 'call_publish_api' ), 10, 3 );
+		add_action( 'transition_post_status', array( $this, 'call_draft_api' ), 10, 3 );
+
+	}
+
+
+	/**
+	 * Create http request.
+	 *
+	 * @param $request_type
+	 * @param $base_url
+	 * @param $data
+	 *
+	 * @return array|mixed|object
+	 */
+	public function send_http_request( $request_type, $base_url, $data ) {
+
+
+		$token = get_option( 'cta_alis_token' );
+		if ( isset( $token ) ) {
+			esc_html( $token );
+		}
+
+		$header = [
+			'accept: application/json',
+			'Authorization: ' . esc_html( $token ),
+			'Content-Type: application/json',
+		];
+
+		$curl = curl_init();
+
+		curl_setopt( $curl, CURLOPT_URL, $base_url );
+		curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, $request_type );
+		curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $data ) );
+		curl_setopt( $curl, CURLOPT_HTTPHEADER, $header );
+		curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
+		curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
+		curl_setopt( $curl, CURLOPT_HEADER, true );
+
+		$response    = curl_exec( $curl );
+		$header_size = curl_getinfo( $curl, CURLINFO_HEADER_SIZE );
+		$header      = substr( $response, 0, $header_size );
+		$body        = substr( $response, $header_size );
+		$result      = json_decode( $body, true );
+
+		curl_close( $curl );
+
+		update_option( 'cta_alis_result', $response );
+
+		return $result;
 
 	}
 
 	/**
-	 * Access to Alis api, when post is published.
+	 * Access to Alis api to create draft.
 	 *
 	 * @param $new_status
 	 * @param $old_status
 	 * @param $post
 	 */
-	public function call_publish_api( $new_status, $old_status, $post ) {
+	public function call_draft_api( $new_status, $old_status, $post ) {
 
 		$post_thumbnail_id = get_post_thumbnail_id( $post );
 
 		if ( $old_status == 'new' && $new_status == 'publish' || $old_status == 'pending' && $new_status == 'publish' || $old_status == 'draft' && $new_status == 'publish' || $old_status == 'future' && $new_status == 'publish' || $old_status == 'auto-draft' && $new_status == 'publish' ) {
 
-			$token = get_option( 'cta_alis_token' );
-			if ( isset( $token ) ) {
-				esc_html( $token );
-			}
+
 			$base_url = 'https://alis.to/api/me/articles/drafts';
+
 			$title    = esc_html( $post->post_title );
 
 			if ( has_post_thumbnail() ) {
@@ -56,32 +102,27 @@ class CTA_Alis {
 				'overview'      => $title,
 			];
 
-			$header = [
-				'accept: application/json',
-				'Authorization: ' . esc_html( $token ),
-				'Content-Type: application/json',
-			];
-
-			$curl = curl_init();
-
-			curl_setopt( $curl, CURLOPT_URL, $base_url );
-			curl_setopt( $curl, CURLOPT_CUSTOMREQUEST, 'POST' );
-			curl_setopt( $curl, CURLOPT_POSTFIELDS, json_encode( $data ) );
-			curl_setopt( $curl, CURLOPT_HTTPHEADER, $header );
-			curl_setopt( $curl, CURLOPT_SSL_VERIFYPEER, false );
-			curl_setopt( $curl, CURLOPT_RETURNTRANSFER, true );
-			curl_setopt( $curl, CURLOPT_HEADER, true );
-
-			$response    = curl_exec( $curl );
-			$header_size = curl_getinfo( $curl, CURLINFO_HEADER_SIZE );
-			$header      = substr( $response, 0, $header_size );
-			$body        = substr( $response, $header_size );
-			$result      = json_decode( $body, true );
-
-			update_option('cta_alis_result',$result);
-			curl_close( $curl );
+			$alis_article = self::send_http_request( 'POST', $base_url, $data );
+			self::call_publish_api( $alis_article['article_id'] );
 
 		}
+	}
+
+
+	/**
+	 * Access to Alis api to make draft public.
+	 *
+	 * @param $article_id
+	 */
+	public function call_publish_api( $article_id ) {
+
+		$base_url = 'https://alis.to/api/me/articles/' . (string)$article_id . '/drafts/publish';
+		$data     = [
+			'topic' => 'others',
+			'tgas'  => [ 'others' ]
+		];
+
+		self::send_http_request( 'PUT', $base_url, $data );
 	}
 
 	/**
