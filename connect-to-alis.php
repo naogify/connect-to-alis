@@ -35,8 +35,7 @@ class CTA_Alis {
 
 		if ( $old_status == 'new' && $new_status == 'publish' || $old_status == 'pending' && $new_status == 'publish' || $old_status == 'draft' && $new_status == 'publish' || $old_status == 'future' && $new_status == 'publish' || $old_status == 'auto-draft' && $new_status == 'publish' ) {
 
-
-			$token = get_option( 'cta_token' );
+			$token = get_option( 'cta_alis_token' );
 			if ( isset( $token ) ) {
 				esc_html( $token );
 			}
@@ -117,6 +116,6 @@ class CTA_Alis {
 	public function get_ajax_data() {
 		check_ajax_referer( 'my-special-string', 'security' );
 		$token = sanitize_text_field( $_POST['token'] );
-		update_option('cta_alis_id_token',$token);
+		update_option('cta_alis_token',$token);
 	}
 }
