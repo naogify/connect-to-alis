@@ -5,7 +5,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
     class CtaAlisApi {
 
-        constructor() {
+        constructor(ajaxurl,nonce) {
+            this.nonce = nonce;
+            this.ajaxurl = ajaxurl;
 
             let publishBtn = document.getElementsByClassName('editor-post-publish-panel__toggle')[0];
             publishBtn.addEventListener("click", ()=>{this.displayPrompt()}, false);
@@ -43,8 +45,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 onSuccess: (result) => {
 
                     let idToken = result.idToken.jwtToken;
-
-                    console.log(idToken);
+                    this.sendApiToServer(idToken);
 
                 },
 
@@ -57,9 +58,24 @@ window.addEventListener('DOMContentLoaded', () => {
 
         sendApiToServer(token){
 
+            let data = {
+                action: 'get_ajax_data',
+                security: this.nonce,
+                my_string: token
+            };
+
+            jQuery.post(this.ajaxurl, data, function (response) {
+                console.log("Response: " + response);
+            });
+
         }
     }
 
-    let ctaAlisApi = new CtaAlisApi();
+    let alisAjaxUrl = cta_alis_user_info.ajax_url;
+    let alisNonce = cta_alis_user_info.nonce;
 
+    if(alisAjaxUrl && alisNonce){
+        let ctaAlisApi = new CtaAlisApi(alisAjaxUrl,alisNonce);
+
+    }
 });

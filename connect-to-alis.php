@@ -19,7 +19,7 @@ class CTA_Alis {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_api_scripts' ), 10, 1 );
 		add_action( 'transition_post_status', array( $this, 'call_publish_api' ), 10, 3 );
-
+		add_action( 'wp_ajax_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
 	}
 
 	/**
@@ -93,6 +93,7 @@ class CTA_Alis {
 		if ( 'post-new.php' == $hook && current_user_can( 'administrator' ) ) {
 
 			wp_enqueue_script( 'alis_api_scripts', plugin_dir_url( __FILE__ ) . '/dist/my-app.js', [
+				'jquery',
 				'wp-blocks',
 				'wp-element',
 				'wp-i18n'
@@ -101,10 +102,21 @@ class CTA_Alis {
 			$ajax_nonce = wp_create_nonce( "my-special-string" );
 
 			$data_array = array(
-				'nonce' => $ajax_nonce
+				'ajax_url' => admin_url( 'admin-ajax.php' ),
+				'nonce'    => $ajax_nonce
+
 			);
 			wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
 		}
 
+	}
+
+	/**
+	 * Get api token from javascript.
+	 */
+	public function get_ajax_data() {
+		check_ajax_referer( 'my-special-string', 'security' );
+		echo sanitize_text_field( $_POST['my_string'] );
+		wp_die();
 	}
 }
