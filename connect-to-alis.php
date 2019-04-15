@@ -18,7 +18,7 @@ class CTA_Alis {
 
 	public function __construct() {
 
-//		remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
+		remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
 		add_filter( 'authenticate', array( $this, 'authenticate_via_cognito' ), 20, 3 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_api_scripts' ), 10, 1 );
 		add_action( 'wp_ajax_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
