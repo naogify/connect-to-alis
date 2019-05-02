@@ -12,7 +12,11 @@
  * @package         Connect_To_Alis
  */
 
+require './vendor/autoload.php';
+use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
+
 $CTA_Alis = new CTA_Alis();
+
 
 class CTA_Alis {
 
@@ -27,6 +31,31 @@ class CTA_Alis {
 
 	}
 
+
+	/**
+	 * TODO
+	 * aws-sdk-phpで、cognitoのクライアントを作成、usernameとpasswordをセットして、アクセストークンを取得。
+	 * まだこの関数は動作していない。
+	 *
+	 * https://github.com/aws/aws-sdk-php
+	 * https://docs.aws.amazon.com/aws-sdk-php/v3/api/api-cognito-idp-2016-04-18.html
+	 *
+	 */
+	public function view() {
+		$client = new CognitoIdentityProviderClient([
+			'profile' => 'default',
+			'region'  => 'ap-northeast-1',
+			'version' => 'latest'
+		]);
+		$params = [
+			'Username' => 'naogifydev',
+			'UserPoolId' => 'ap-northeast-1_HNT0fUj4J'
+		];
+		$user = $client->adminGetUser($params);
+		return $user;
+//		return view('user', compact('user'));
+	}
+
 	/**
 	 * @param $user
 	 * @param $username
@@ -36,21 +65,30 @@ class CTA_Alis {
 	 */
 	public function authenticate_via_cognito( $user, $username, $password ) {
 
+
+
 		if(empty($username) || empty($password)) {
 			return false;
 		}else{
 
-			$alis_article = self::send_http_request( 'POST', 'https://alis.to/api/me/info', $data );
-
+			//アクセストークンを取得
 		}
 
+		/**
+		 * TODO
+		 * アクセストークンが返ってきた + ユーザー名が既存のユーザーになければ作成。
+		 * tokenを update_option( 'cta_alis_token' )で保存。
+		 */
 
+		/**
+		 * TODO
+		 * 既存のユーザ名として存在すればログイン処理
+		 */
 
-
-
-
-
-
+		/**
+		 * TODO
+		 * アクセストークンが返ってこなければ、通常のログイン処理。
+		 */
 
 
 //		$login_info = 'admin11';
