@@ -20,23 +20,12 @@ class CTA_Alis {
 
 		remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
 		add_filter( 'authenticate', array( $this, 'authenticate_via_cognito' ), 20, 3 );
+
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_api_scripts' ), 10, 1 );
 		add_action( 'wp_ajax_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
 		add_action( 'transition_post_status', array( $this, 'call_draft_api' ), 10, 3 );
 
 	}
-
-
-	/**
-	 *  Add custom_authentication
-	 *
-	 */
-//	public function custom_authentication() {
-//
-////		remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
-//		add_filter( 'authenticate', array( $this, 'authenticate_via_cognito' ), 20, 3 );
-//	}
-
 
 	/**
 	 * @param $user
@@ -47,20 +36,36 @@ class CTA_Alis {
 	 */
 	public function authenticate_via_cognito( $user, $username, $password ) {
 
-		$login_info = 'admin11';
+		if(empty($username) || empty($password)) {
+			return false;
+		}else{
 
-		if ( $username == $login_info && $password == $login_info ) {
+			$alis_article = self::send_http_request( 'POST', 'https://alis.to/api/me/info', $data );
 
-			$user_id = wp_create_user( $username, $password, $username . '@gmail.com' );
+		}
 
-//			$creds = array(
+
+
+
+
+
+
+
+
+
+//		$login_info = 'admin11';
+//
+//		if ( $username == $login_info && $password == $login_info ) {
+//
+//			$user_id = wp_create_user( $username, $password, $username . '@gmail.com' );
+//			$creds   = array(
 //				'user_login'    => $username,
 //				'user_password' => $password,
 //				'remember'      => false
 //			);
 //
 //			wp_signon( $creds, false );
-		}
+//		}
 
 
 //			if ( $user_id ) {
@@ -153,7 +158,6 @@ class CTA_Alis {
 
 			if ( has_post_thumbnail() ) {
 				$thumbnail = get_the_post_thumbnail_url( get_the_ID(), 'full' );
-				var_dump( $thumbnail );
 				die();
 			} else {
 				$thumbnail = esc_url( content_url() ) . '/plugins/connect-to-alis/assets/thumbnail.jpg';
