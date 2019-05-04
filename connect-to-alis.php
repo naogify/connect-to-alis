@@ -12,7 +12,11 @@
  * @package         Connect_To_Alis
  */
 
-require './vendor/autoload.php';
+// Do not load directly.
+defined( 'ABSPATH' ) || die();
+
+require_once( 'vendor/autoload.php' );
+
 use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 
 $CTA_Alis = new CTA_Alis();
@@ -48,11 +52,13 @@ class CTA_Alis {
 			'version' => 'latest'
 		]);
 		$params = [
-			'Username' => 'naogifydev',
-			'UserPoolId' => 'ap-northeast-1_HNT0fUj4J'
+			'AuthFlow' => 'USER_PASSWORD_AUTH',
+//			'AuthParameters'    => [],
+			'ClientId' => '2gri5iuukve302i4ghclh6p5rg',
 		];
-		$user = $client->adminGetUser($params);
-		return $user;
+		$user   = $client->initiateAuth( $params );
+		var_dump($user);
+//		return $user;
 //		return view('user', compact('user'));
 	}
 
@@ -72,6 +78,7 @@ class CTA_Alis {
 		}else{
 
 			//アクセストークンを取得
+
 		}
 
 		/**
