@@ -5,23 +5,12 @@ window.addEventListener('DOMContentLoaded', () => {
 
     class CtaAlisApi {
 
-        constructor(ajaxurl,nonce) {
+        constructor(ajaxurl, nonce, username, password) {
             this.nonce = nonce;
             this.ajaxurl = ajaxurl;
-
-            let publishBtn = document.getElementsByClassName('editor-post-publish-panel__toggle')[0];
-            publishBtn.addEventListener("click", ()=>{this.displayPrompt()}, false);
-        }
-
-        displayPrompt() {
-
-            let alisUsername = prompt(__('To Publish this post in Alis, enter your Alis Username', 'connect-to-alis'));
-            let alisPassword = prompt(__('Also enter Alis Password', 'connect-to-alis'));
-
-            if (alisUsername && alisPassword) {
-                alert(__('This post will also share in Alis. Are you OK about that?', 'connect-to-alis'));
-                this.getToken(alisUsername, alisPassword);
-            }
+            this.username = username;
+            this.password = password;
+            this.getToken(username, password);
         }
 
         getToken(alisUsername, alisPassword) {
@@ -71,12 +60,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
         }
     }
+    let cta_alis_user_info;
 
-    let alisAjaxUrl = cta_alis_user_info.ajax_url;
-    let alisNonce = cta_alis_user_info.nonce;
+    if(cta_alis_user_info){
 
-    if(alisAjaxUrl && alisNonce){
-        let ctaAlisApi = new CtaAlisApi(alisAjaxUrl,alisNonce);
+        let alisAjaxUrl = cta_alis_user_info.ajax_url;
+        let alisNonce = cta_alis_user_info.nonce;
+        let alisUsername = cta_alis_user_info.username;
+        let alisPassword = cta_alis_user_info.password;
+        console.log(alisUsername);
 
+        if(alisAjaxUrl && alisNonce){
+            let ctaAlisApi = new CtaAlisApi(alisAjaxUrl, alisNonce, alisUsername, alisPassword);
+        }
     }
 });

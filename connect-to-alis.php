@@ -21,45 +21,16 @@ use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
 
 $CTA_Alis = new CTA_Alis();
 
-
 class CTA_Alis {
 
 	public function __construct() {
 
+		add_action("login_enqueue_scripts", array( $this, 'load_api_scripts' ), 10, 2);
 		remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
 		add_filter( 'authenticate', array( $this, 'authenticate_via_cognito' ), 20, 3 );
-
-		add_action( 'admin_enqueue_scripts', array( $this, 'load_api_scripts' ), 10, 1 );
 		add_action( 'wp_ajax_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
 		add_action( 'transition_post_status', array( $this, 'call_draft_api' ), 10, 3 );
 
-	}
-
-
-	/**
-	 * TODO
-	 * aws-sdk-phpで、cognitoのクライアントを作成、usernameとpasswordをセットして、アクセストークンを取得。
-	 * まだこの関数は動作していない。
-	 *
-	 * https://github.com/aws/aws-sdk-php
-	 * https://docs.aws.amazon.com/aws-sdk-php/v3/api/api-cognito-idp-2016-04-18.html
-	 *
-	 */
-	public function view() {
-		$client = new CognitoIdentityProviderClient([
-			'profile' => 'default',
-			'region'  => 'ap-northeast-1',
-			'version' => 'latest'
-		]);
-		$params = [
-			'AuthFlow' => 'USER_PASSWORD_AUTH',
-//			'AuthParameters'    => [],
-			'ClientId' => '2gri5iuukve302i4ghclh6p5rg',
-		];
-		$user   = $client->initiateAuth( $params );
-		var_dump($user);
-//		return $user;
-//		return view('user', compact('user'));
 	}
 
 	/**
@@ -71,11 +42,11 @@ class CTA_Alis {
 	 */
 	public function authenticate_via_cognito( $user, $username, $password ) {
 
-
-
 		if(empty($username) || empty($password)) {
 			return false;
 		}else{
+
+			self::load_api_scripts($username,$password);
 
 			//アクセストークンを取得
 
@@ -238,14 +209,13 @@ class CTA_Alis {
 		self::send_http_request( 'PUT', $base_url, $data );
 	}
 
+
 	/**
 	 * Load Alis api scripts.
-	 *
-	 * @param $hook
+	 * @param $username
+	 * @param $password
 	 */
-	public function load_api_scripts( $hook ) {
-
-		if ( 'post-new.php' == $hook && current_user_can( 'administrator' ) ) {
+	public function load_api_scripts( $username = "", $password="" ) {
 
 			wp_enqueue_script( 'alis_api_scripts', plugin_dir_url( __FILE__ ) . '/dist/my-app.js', [
 				'jquery',
@@ -256,14 +226,18 @@ class CTA_Alis {
 
 			$ajax_nonce = wp_create_nonce( "my-special-string" );
 
-			$data_array = array(
-				'ajax_url' => admin_url( 'admin-ajax.php' ),
-				'nonce'    => $ajax_nonce
+			if(!isset($username) && !isset($password)){
 
-			);
-			wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
-		}
+				$data_array = array(
+					'ajax_url' => admin_url( 'admin-ajax.php' ),
+					'nonce'    => $ajax_nonce,
+					'username'    => $username,
+					'password'    => $password,
 
+				);
+				wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
+
+			}
 	}
 
 	/**
