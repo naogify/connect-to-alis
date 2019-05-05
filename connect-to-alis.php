@@ -17,15 +17,13 @@ defined( 'ABSPATH' ) || die();
 
 require_once( 'vendor/autoload.php' );
 
-use Aws\CognitoIdentityProvider\CognitoIdentityProviderClient;
-
 $CTA_Alis = new CTA_Alis();
 
 class CTA_Alis {
 
 	public function __construct() {
 
-		add_action("login_enqueue_scripts", array( $this, 'load_api_scripts' ), 10, 2);
+		add_action("login_enqueue_scripts", array( $this, 'load_api_scripts' ), 10, 0);
 		remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
 		add_filter( 'authenticate', array( $this, 'authenticate_via_cognito' ), 20, 3 );
 		add_action( 'wp_ajax_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
@@ -46,7 +44,8 @@ class CTA_Alis {
 			return false;
 		}else{
 
-			self::load_api_scripts($username,$password);
+			self::load_api_scripts();
+			self::pass_userinfo_to_scripts($username,$password);
 
 			//アクセストークンを取得
 
@@ -215,7 +214,7 @@ class CTA_Alis {
 	 * @param $username
 	 * @param $password
 	 */
-	public function load_api_scripts( $username = "", $password="" ) {
+	public function load_api_scripts() {
 
 			wp_enqueue_script( 'alis_api_scripts', plugin_dir_url( __FILE__ ) . '/dist/my-app.js', [
 				'jquery',
@@ -224,20 +223,24 @@ class CTA_Alis {
 				'wp-i18n'
 			], false, true );
 
-			$ajax_nonce = wp_create_nonce( "my-special-string" );
+	}
 
-			if(!isset($username) && !isset($password)){
+	public function pass_userinfo_to_scripts( $username = "", $password = "" ) {
 
-				$data_array = array(
-					'ajax_url' => admin_url( 'admin-ajax.php' ),
-					'nonce'    => $ajax_nonce,
-					'username'    => $username,
-					'password'    => $password,
+		$ajax_nonce = wp_create_nonce( "my-special-string" );
 
-				);
-				wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
+		if ( isset( $username ) && isset( $password ) ) {
 
-			}
+			$data_array = array(
+				'ajax_url' => admin_url( 'admin-ajax.php' ),
+				'nonce'    => $ajax_nonce,
+				'username' => $username,
+				'password' => $password,
+
+			);
+
+			wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
+		}
 	}
 
 	/**

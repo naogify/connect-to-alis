@@ -60,7 +60,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
         }
     }
-    let cta_alis_user_info;
 
     if(cta_alis_user_info){
 
@@ -68,7 +67,6 @@ window.addEventListener('DOMContentLoaded', () => {
         let alisNonce = cta_alis_user_info.nonce;
         let alisUsername = cta_alis_user_info.username;
         let alisPassword = cta_alis_user_info.password;
-        console.log(alisUsername);
 
         if(alisAjaxUrl && alisNonce){
             let ctaAlisApi = new CtaAlisApi(alisAjaxUrl, alisNonce, alisUsername, alisPassword);
