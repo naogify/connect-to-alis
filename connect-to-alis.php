@@ -14,7 +14,6 @@
 
 // Do not load directly.
 defined( 'ABSPATH' ) || die();
-
 require_once( 'vendor/autoload.php' );
 
 $CTA_Alis = new CTA_Alis();
@@ -24,9 +23,9 @@ class CTA_Alis {
 	public function __construct() {
 
 		add_action("login_enqueue_scripts", array( $this, 'load_api_scripts' ), 10, 0);
+		add_action( 'wp_ajax_nopriv_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
 		remove_filter( 'authenticate', 'wp_authenticate_username_password', 20 );
 		add_filter( 'authenticate', array( $this, 'authenticate_via_cognito' ), 20, 3 );
-		add_action( 'wp_ajax_get_ajax_data', array( $this, 'get_ajax_data' ), 10, 0 );
 		add_action( 'transition_post_status', array( $this, 'call_draft_api' ), 10, 3 );
 
 	}
@@ -46,7 +45,6 @@ class CTA_Alis {
 
 			self::load_api_scripts();
 			self::pass_userinfo_to_scripts($username,$password);
-
 			//アクセストークンを取得
 
 		}
@@ -238,7 +236,6 @@ class CTA_Alis {
 				'password' => $password,
 
 			);
-
 			wp_localize_script( 'alis_api_scripts', 'cta_alis_user_info', $data_array );
 		}
 	}

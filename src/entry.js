@@ -8,8 +8,6 @@ window.addEventListener('DOMContentLoaded', () => {
         constructor(ajaxurl, nonce, username, password) {
             this.nonce = nonce;
             this.ajaxurl = ajaxurl;
-            this.username = username;
-            this.password = password;
             this.getToken(username, password);
         }
 
@@ -39,7 +37,6 @@ window.addEventListener('DOMContentLoaded', () => {
                 },
 
                 onFailure: (err) => {
-                    alert("Fail to share your post in Alis. Your userid or password is wrong.");
                     console.log(err);
                 },
 
